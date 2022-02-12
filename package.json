@@ -1,0 +1,19 @@
+{
+  "name": "awards-compiler",
+  "version": "1.0.0",
+  "repository": "git://github.com/QuiteQuiet/smog-awards-compiler.git",
+  "description": "",
+  "main": "app.js",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "simple-node-logger": "^18.12.21"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Quite Quiet",
+  "license": "ISC"
+}
