@@ -21,9 +21,14 @@ function qualifiedVoter(data) {
     return join < cutoff && data.postcount >= 10;
 }
 
+// Arguments
+const title = args[0];
+
+const username = typeof args[1] !== 'undefined' ? args[1] : config.username;
+const password = typeof args[2] !== 'undefined' ? args[2] : config.password;
+
 // Application specific stuff
-let session = new XenforoLoginSession(config.username, config.password);
-let title = args[0];
+let session = new XenforoLoginSession(username, password);
 
 session.start('https://www.smogon.com/forums/')
 .then(started => {
