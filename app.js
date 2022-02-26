@@ -16,9 +16,7 @@ const log = require('simple-node-logger').createSimpleLogger({
 });
 
 function qualifiedVoter(data) {
-    let join = new Date(data.joindate);
-    let cutoff = new Date((new Date()).getYear() + 1899, 11, 1);
-    return join < cutoff && data.postcount >= 10;
+    return true;
 }
 
 // Arguments

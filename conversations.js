@@ -16,20 +16,6 @@ class Conversations {
         this.log = log;
     }
 
-    authorData(data) {
-        let self = this;
-        return new Promise((resolve) => {
-            self.session.open(`members/${data.authorid}`)
-            .then(html => {
-                let $ = parsePage(html);
-                data.joindate = $('.u-dt').attr('datetime');
-                data.postcount = $('.pairJustifier dd a').text().split('\n')[1].replace(/[^0-9]/g, '');
-                resolve(data);
-            })
-            .catch(err => self.log.error(err));
-        });
-    }
-
     idsByTitle(title) {
         let self = this;
         let url = 'conversations/page-';
@@ -73,29 +59,43 @@ class Conversations {
                 let $ = parsePage(html);
                 $('article.message').each((_, elem) => {
                     let $elem = $(elem);
-                    let link = $elem.find('a.username').attr('href');
+                    let author = '';
                     let nomination = [];
+                    let lines = [];
                     for (let line of $elem.find('.bbWrapper').html().replace(/i\&gt\;/g, '</i>').split('\n')) {
-                        line = line.replace(/\&gt/g, '>');
-                        let category = /<b>(.+?)<\/b>/g.exec(line)[1];
-                        let votes = /<i>(.+?)<\/i>/g.exec(line)[1];
-                        nomination.push({[category]: votes});
+                        line.replace(/\&gt/g, '>');
+                        if (line.startsWith('<b>')) {
+                            lines.push(line.replace('<br />', ''));
+                        } else {
+                            lines[lines.length - 1] += line;
+                        }
                     }
 
-                    promises.push(this.authorData({
-                        author: $elem.attr('data-author'),
+                    for (let line of lines) {
+                        let category = /<b>(.+?)<\/b>/g.exec(line)[1];
+                        let votes = line.substring(line.indexOf('</b> ') + 5).replace('<br>', '');
+                        if (category === 'User name:') {
+                            author = votes;
+                        } else if (votes !== '(DID NOT ANSWER QUESTION)') {
+                            let linebreak = category.indexOf('<br>');
+                            if (linebreak > -1) {
+                                category = category.substring(0, linebreak);
+                            }
+                            for (const vote of votes.split(',')) {
+                                nomination.push({[category]: vote.replace('->;', '->').trim()});
+                            }
+                        }
+                    }
+                    messages.push({
+                        author: author,
                         nominations: nomination,
                         datetime: $elem.find('.message-attribution time').attr('datetime'),
-                        authorid: getId(link),
-                    }));
+                        nominations: nomination,
+                        //authorid: getId(link),
+                    });
                 });
 
-                Promise.all(promises).then(data => {
-                    for (const post of data) {
-                        messages.push(post);
-                    }
-                    resolve(messages);
-                });
+                resolve(messages);
             })
             .catch(err => self.log.error(err));
         });
