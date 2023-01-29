@@ -2,7 +2,7 @@ Script for fetching the nomnations and votes for the Smog Awards.
 
 Requires access to the TFP Smogon account which is target for all votes. Which is limited to relevant TFP staff members only. The script is fairly useless without access.
 
-I am aware request and request-promise has been deprecated. Should be replaced with axios or other valid candidate.
+Now runs using [needle](https://www.npmjs.com/package/needle) which I believe should work on newer node versions.
 
 # Usage
 
