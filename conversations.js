@@ -73,10 +73,14 @@ class Conversations {
 
                     for (let line of lines) {
                         let category = /<b>(.+?)<\/b>/g.exec(line)[1];
-                        let votes = line.substring(line.indexOf('</b> ') + 5).replace('<br>', '');
+                        let votes = line.substring(line.indexOf('</b>') + 4);
+                        if (!votes) {
+                            continue;
+                        }
+                        votes = votes.substring(1).replace('<br>', '');
                         if (category === 'User name:') {
                             author = votes;
-                        } else if (votes !== '(DID NOT ANSWER QUESTION)') {
+                        } else if (votes && votes !== '(DID NOT ANSWER QUESTION)') {
                             let linebreak = category.indexOf('<br>');
                             if (linebreak > -1) {
                                 category = category.substring(0, linebreak);
@@ -97,7 +101,7 @@ class Conversations {
 
                 resolve(messages);
             })
-            .catch(err => self.log.error(err));
+            .catch(err => self.log.error(`${url}: ${err}`));
         });
     }
 }
