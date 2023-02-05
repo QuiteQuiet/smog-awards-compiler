@@ -3,7 +3,7 @@
 const cheerio = require('cheerio');
 
 function parsePage(html) {
-    return cheerio.load(html)
+    return cheerio.load(html);
 };
 
 function getId(string) {
@@ -18,14 +18,18 @@ class Conversations {
 
     idsByTitle(title) {
         let self = this;
-        let url = 'conversations/page-';
+        let url = 'conversations/';
         let ids = [];
 
         return new Promise((resolve) => {
             function loadPage(page) {
-                self.session.open(`${url}${page}`)
-                .then(html => {
-                    let $ = parsePage(html);
+                let next = url;
+                if (page > 1) {
+                    next = `${next}page-${page}`;
+                }
+                self.session.open(next)
+                .then(response => {
+                    let $ = parsePage(response.body);
                     let newVotes = 0;
                     $('a.structItem-title').each((_, elem) => {
                         let t = cheerio.load(elem).text().trim();
@@ -54,9 +58,8 @@ class Conversations {
         let self = this;
         return new Promise((resolve) => {
             self.session.open(url)
-            .then((html) => {
-                let promises = [];
-                let $ = parsePage(html);
+            .then(response => {
+                let $ = parsePage(response.body);
                 $('article.message').each((_, elem) => {
                     let $elem = $(elem);
                     let author = '';
