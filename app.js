@@ -36,38 +36,36 @@ session.start('https://www.smogon.com/forums/')
     let conversations = new Conversations(session, log);
     return conversations.idsByTitle(title);
 })
-.then(([conversations, convIds]) => {
-    let promises = [];
+.then(async ([conversations, convIds]) => {
     let file = [];
+
+    let nomCount = convIds.length;
+    let parsedConvs = 0;
+    log.info(`Votes found ${nomCount}`);
     for (let id of convIds) {
-        promises.push(conversations.content(id));
+        let content = await conversations.content(id);
+        content = content[0];
+        if (qualifiedVoter(content)) {
+            file.push(content.author);
+            for (const nom of content.nominations) {
+                for (let key of Object.keys(nom)) {
+                    file.push(`${key}: ${nom[key]}`);
+                }
+            }
+            file.push(''); // Separate ballots with newline
+        } else {
+            nomCount--;
+            log.info(`Ignored user "${content.author}", join date: ${content.joindate}, postcount: ${content.postcount}`);
+        }
+        log.info(`Finished #${++parsedConvs}`);
     }
 
-    let nomCount = promises.length;
-    log.info(`Votes found ${nomCount}`);
-    Promise.all(promises).then(results => {
-        for (let content of results) {
-            content = content[0];
-            if (qualifiedVoter(content)) {
-                file.push(content.author);
-                for (const nom of content.nominations) {
-                    for (let key of Object.keys(nom)) {
-                        file.push(`${key}: ${nom[key]}`);
-                    }
-                }
-                file.push(''); // Separate ballots with newline
-            } else {
-                nomCount--;
-                log.info(`Ignored user "${content.author}", join date: ${content.joindate}, postcount: ${content.postcount}`);
-            }
-        }
-        try {
-            fs.writeFileSync('results.txt', file.join('\n'));
-            log.info(`Compiled ${nomCount} votes`);
-        } catch (err) {
-            log.error(err);
-        }
-    });
+    try {
+        fs.writeFileSync('results.txt', file.join('\n'));
+        log.info(`Compiled ${nomCount} votes`);
+    } catch (err) {
+        log.error(err);
+    }
 })
 .catch(err => {
     log.fatal(err);
