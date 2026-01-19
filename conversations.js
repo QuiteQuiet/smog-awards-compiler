@@ -68,7 +68,7 @@ class Conversations {
                     for (let line of $elem.find('.bbWrapper').html().replace(/i\&gt\;/g, '</i>').split('\n')) {
                         line.replace(/\&gt/g, '>');
                         if (line.startsWith('<b>')) {
-                            lines.push(line.replace('<br />', ''));
+                            lines.push(line.replace(/<br( \/)?>/g, ''));
                         } else {
                             lines[lines.length - 1] += line;
                         }
@@ -76,12 +76,12 @@ class Conversations {
 
                     for (let line of lines) {
                         let category = /<b>(.+?)<\/b>/g.exec(line)[1];
-                        let votes = line.substring(line.indexOf('</b>') + 4);
+                        let votes = line.substring(line.indexOf('</b>') + 4).trim();
                         if (!votes) {
                             continue;
                         }
-                        votes = votes.substring(1).replace('<br>', '');
-                        if (category === 'User name:') {
+                        votes = votes.replace(/<br( \/)?>/g, '');
+                        if (category === 'User name:' || category === 'Username:') {
                             author = votes;
                         } else if (votes && votes !== '(DID NOT ANSWER QUESTION)') {
                             let linebreak = category.indexOf('<br>');
