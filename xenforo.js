@@ -41,7 +41,7 @@ class XenforoLoginSession {
         return new Promise((resolve, reject) => {
             if (self.site) reject(new AuthenticationError('Already logged in'));
 
-            needle('get', site)
+            needle('get', `${site}/login`)
             .then(response => {
                 self.setCookies(response.cookies);
                 let $ = cheerio.load(response.body);
