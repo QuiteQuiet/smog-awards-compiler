@@ -88,6 +88,10 @@ class Conversations {
                             if (linebreak > -1) {
                                 category = category.substring(0, linebreak);
                             }
+                            let htmlRemaining = /<|[0-9]/.exec(category); // HTML tag or 1)
+                            if (htmlRemaining) {
+                                category = category.substring(0, htmlRemaining.index);
+                            }
                             for (const vote of votes.split(',')) {
                                 nomination.push({[category]: vote.replace('->;', '->').trim()});
                             }
